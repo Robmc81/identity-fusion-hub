@@ -20,7 +20,7 @@ const Index = () => {
     setTimeout(() => {
       setIsConnected(true);
       setIsConnecting(false);
-      toast.success("Successfully connected to both LDAP directories");
+      toast.success("Successfully connected to OpenLDAP server");
     }, 2000);
   };
 
@@ -35,7 +35,7 @@ const Index = () => {
             Directory Management & Account Requests
           </h1>
           <p className="text-gray-500 max-w-2xl mx-auto">
-            Manage LDAP directory synchronization and handle account requests in one place
+            Manage internal user directory and synchronize with OpenLDAP
           </p>
         </header>
 
@@ -48,12 +48,14 @@ const Index = () => {
           <TabsContent value="sync" className="space-y-8">
             <div className="grid lg:grid-cols-2 gap-8">
               <DirectoryConfig 
-                title="Source Directory" 
-                subtitle="Configure your source LDAP server"
+                title="Internal Directory" 
+                subtitle="Configure your internal user database"
+                type="source"
               />
               <DirectoryConfig 
-                title="Target Directory"
-                subtitle="Configure your target LDAP server" 
+                title="OpenLDAP Server"
+                subtitle="Configure your target OpenLDAP server" 
+                type="target"
               />
             </div>
 
@@ -67,12 +69,12 @@ const Index = () => {
                 {isConnecting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Connecting...
+                    Connecting to OpenLDAP...
                   </>
                 ) : (
                   <>
                     <ArrowLeftRight className="mr-2 h-4 w-4" />
-                    Connect Directories
+                    Connect to OpenLDAP
                   </>
                 )}
               </Button>
