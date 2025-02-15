@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, ArrowLeftRight } from "lucide-react";
 import DirectoryConfig from "@/components/DirectoryConfig";
 import SyncPanel from "@/components/SyncPanel";
@@ -22,23 +22,30 @@ export interface InternalUser {
   lastModified: string;
 }
 
+const INITIAL_USER = {
+  id: "1",
+  firstName: "John",
+  lastName: "Doe",
+  email: "john.doe@example.com",
+  department: "Engineering",
+  title: "Senior Software Engineer",
+  employeeId: "EMP001",
+  status: "active" as const,
+  created: "2024-01-15",
+  lastModified: "2024-02-20"
+};
+
 const Index = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-  const [users, setUsers] = useState<InternalUser[]>([
-    {
-      id: "1",
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      department: "Engineering",
-      title: "Senior Software Engineer",
-      employeeId: "EMP001",
-      status: "active",
-      created: "2024-01-15",
-      lastModified: "2024-02-20"
-    }
-  ]);
+  const [users, setUsers] = useState<InternalUser[]>(() => {
+    const savedUsers = localStorage.getItem('internalUsers');
+    return savedUsers ? JSON.parse(savedUsers) : [INITIAL_USER];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('internalUsers', JSON.stringify(users));
+  }, [users]);
 
   const handleConnect = async () => {
     setIsConnecting(true);
