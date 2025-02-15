@@ -1,7 +1,5 @@
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Loader2, ArrowLeftRight } from "lucide-react";
 import DirectoryConfig from "@/components/DirectoryConfig";
@@ -9,6 +7,7 @@ import SyncPanel from "@/components/SyncPanel";
 import AccountRequest from "@/components/AccountRequest";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import InternalDirectory from "@/components/InternalDirectory";
 
 const Index = () => {
   const [isConnecting, setIsConnecting] = useState(false);
@@ -39,11 +38,16 @@ const Index = () => {
           </p>
         </header>
 
-        <Tabs defaultValue="sync" className="space-y-6">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
-            <TabsTrigger value="sync">Directory Sync</TabsTrigger>
+        <Tabs defaultValue="directory" className="space-y-6">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
+            <TabsTrigger value="directory">Directory</TabsTrigger>
+            <TabsTrigger value="sync">Sync</TabsTrigger>
             <TabsTrigger value="request">Request Account</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="directory">
+            <InternalDirectory />
+          </TabsContent>
 
           <TabsContent value="sync" className="space-y-8">
             <div className="grid lg:grid-cols-2 gap-8">
