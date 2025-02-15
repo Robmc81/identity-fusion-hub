@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { InternalUser } from "@/pages/Index";
 
 interface Request {
   id: number;
@@ -27,7 +28,11 @@ interface Request {
   submittedAt: string;
 }
 
-const AccountRequest = () => {
+interface AccountRequestProps {
+  onProvision: (user: Omit<InternalUser, 'id' | 'created' | 'lastModified'>) => void;
+}
+
+const AccountRequest = ({ onProvision }: AccountRequestProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -38,45 +43,32 @@ const AccountRequest = () => {
   });
 
   // Sample requests data - in a real app, this would come from a backend
-  const [requests, setRequests] = useState<Request[]>([
-    {
-      id: 1,
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      department: "Engineering",
-      justification: "Need access to development tools",
-      status: "pending",
-      submittedAt: "2024-02-20"
-    },
-    {
-      id: 2,
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane.smith@example.com",
-      department: "Marketing",
-      justification: "Required for campaign management",
-      status: "provisioned",
-      submittedAt: "2024-02-19"
-    }
-  ]);
+  const [requests, setRequests] = useState<Request[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate request submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      toast.success("Account request submitted successfully!");
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        department: "",
-        justification: ""
-      });
-    }, 2000);
+    // Create new request
+    const newRequest: Request = {
+      id: requests.length + 1,
+      ...formData,
+      status: "pending",
+      submittedAt: new Date().toISOString().split('T')[0]
+    };
+
+    // Add to requests
+    setRequests(prev => [...prev, newRequest]);
+    
+    setIsSubmitting(false);
+    toast.success("Account request submitted successfully!");
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      department: "",
+      justification: ""
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -93,9 +85,25 @@ const AccountRequest = () => {
       r.id === request.id ? { ...r, status: "provisioning" } : r
     ));
 
+    // Create new internal directory user
+    const newUser = {
+      firstName: request.firstName,
+      lastName: request.lastName,
+      email: request.email,
+      department: request.department,
+      title: "New Employee", // Default title
+      employeeId: `EMP${String(request.id).padStart(3, '0')}`,
+      status: "active" as const
+    };
+
     // Simulate provisioning process
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 3000)),
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          onProvision(newUser);
+          resolve();
+        }, 3000);
+      }),
       {
         loading: 'Provisioning user in internal directory...',
         success: 'User successfully provisioned in internal directory',

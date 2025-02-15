@@ -9,18 +9,54 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import InternalDirectory from "@/components/InternalDirectory";
 
+export interface InternalUser {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  department: string;
+  title: string;
+  employeeId: string;
+  status: "active" | "inactive";
+  created: string;
+  lastModified: string;
+}
+
 const Index = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [users, setUsers] = useState<InternalUser[]>([
+    {
+      id: "1",
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+      department: "Engineering",
+      title: "Senior Software Engineer",
+      employeeId: "EMP001",
+      status: "active",
+      created: "2024-01-15",
+      lastModified: "2024-02-20"
+    }
+  ]);
 
   const handleConnect = async () => {
     setIsConnecting(true);
-    // Simulate connection for demo
     setTimeout(() => {
       setIsConnected(true);
       setIsConnecting(false);
       toast.success("Successfully connected to OpenLDAP server");
     }, 2000);
+  };
+
+  const addUserToDirectory = (user: Omit<InternalUser, 'id' | 'created' | 'lastModified'>) => {
+    const newUser: InternalUser = {
+      ...user,
+      id: `${users.length + 1}`,
+      created: new Date().toISOString(),
+      lastModified: new Date().toISOString()
+    };
+    setUsers(prev => [...prev, newUser]);
   };
 
   return (
@@ -46,7 +82,7 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="directory">
-            <InternalDirectory />
+            <InternalDirectory users={users} />
           </TabsContent>
 
           <TabsContent value="sync" className="space-y-8">
@@ -92,7 +128,7 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="request">
-            <AccountRequest />
+            <AccountRequest onProvision={addUserToDirectory} />
           </TabsContent>
         </Tabs>
       </div>

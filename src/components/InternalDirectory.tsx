@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -18,51 +17,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { InternalUser } from "@/pages/Index";
 
-interface InternalUser {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  department: string;
-  title: string;
-  employeeId: string;
-  status: "active" | "inactive";
-  created: string;
-  lastModified: string;
+interface InternalDirectoryProps {
+  users: InternalUser[];
 }
 
-const InternalDirectory = () => {
+const InternalDirectory = ({ users }: InternalDirectoryProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<InternalUser | null>(null);
-  
-  // Sample internal directory data
-  const [users] = useState<InternalUser[]>([
-    {
-      id: "1",
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      department: "Engineering",
-      title: "Senior Software Engineer",
-      employeeId: "EMP001",
-      status: "active",
-      created: "2024-01-15",
-      lastModified: "2024-02-20"
-    },
-    {
-      id: "2",
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane.smith@example.com",
-      department: "Human Resources",
-      title: "HR Manager",
-      employeeId: "EMP002",
-      status: "active",
-      created: "2024-01-16",
-      lastModified: "2024-02-19"
-    }
-  ]);
 
   const filteredUsers = users.filter(user => 
     user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
