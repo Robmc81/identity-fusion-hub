@@ -16,6 +16,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+interface Request {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  department: string;
+  justification: string;
+  status: "pending" | "approved" | "rejected" | "provisioning" | "provisioned";
+  submittedAt: string;
+}
+
 const AccountRequest = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -27,7 +38,7 @@ const AccountRequest = () => {
   });
 
   // Sample requests data - in a real app, this would come from a backend
-  const [requests] = useState([
+  const [requests, setRequests] = useState<Request[]>([
     {
       id: 1,
       firstName: "John",
@@ -45,7 +56,7 @@ const AccountRequest = () => {
       email: "jane.smith@example.com",
       department: "Marketing",
       justification: "Required for campaign management",
-      status: "approved",
+      status: "provisioned",
       submittedAt: "2024-02-19"
     }
   ]);
@@ -76,12 +87,65 @@ const AccountRequest = () => {
     }));
   };
 
-  const handleApprove = (id: number) => {
+  const provisionUser = async (request: Request) => {
+    // Update request status to provisioning
+    setRequests(prev => prev.map(r => 
+      r.id === request.id ? { ...r, status: "provisioning" } : r
+    ));
+
+    // Simulate provisioning process
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 3000)),
+      {
+        loading: 'Provisioning user in internal directory...',
+        success: 'User successfully provisioned in internal directory',
+        error: 'Failed to provision user'
+      }
+    );
+
+    // After 3 seconds, update the status to provisioned
+    setTimeout(() => {
+      setRequests(prev => prev.map(r => 
+        r.id === request.id ? { ...r, status: "provisioned" } : r
+      ));
+    }, 3000);
+  };
+
+  const handleApprove = async (id: number) => {
+    const request = requests.find(r => r.id === id);
+    if (!request) return;
+
+    // First update status to approved
+    setRequests(prev => prev.map(r => 
+      r.id === id ? { ...r, status: "approved" } : r
+    ));
+    
     toast.success("Request approved successfully");
+    
+    // Then start provisioning process
+    await provisionUser(request);
   };
 
   const handleReject = (id: number) => {
+    setRequests(prev => prev.map(r => 
+      r.id === id ? { ...r, status: "rejected" } : r
+    ));
     toast.error("Request rejected");
+  };
+
+  const getStatusBadgeClass = (status: Request['status']) => {
+    switch (status) {
+      case 'approved':
+        return 'bg-blue-100 text-blue-800';
+      case 'provisioning':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'provisioned':
+        return 'bg-green-100 text-green-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
@@ -218,35 +282,32 @@ const AccountRequest = () => {
                       <TableCell>{request.department}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                          ${request.status === 'approved' 
-                            ? 'bg-green-100 text-green-800'
-                            : request.status === 'rejected'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                          }`}>
+                          ${getStatusBadgeClass(request.status)}`}>
                           {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                         </span>
                       </TableCell>
                       <TableCell>{request.submittedAt}</TableCell>
                       <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-green-600 hover:text-green-700"
-                            onClick={() => handleApprove(request.id)}
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => handleReject(request.id)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        {request.status === 'pending' && (
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-green-600 hover:text-green-700"
+                              onClick={() => handleApprove(request.id)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => handleReject(request.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
